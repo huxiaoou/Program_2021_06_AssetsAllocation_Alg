@@ -1,4 +1,5 @@
 import numpy as np
+import cvxpy as cvp
 import scipy.optimize
 from scipy.optimize import minimize
 
@@ -258,6 +259,43 @@ def minimize_utility_con6(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
     else:
         print("ERROR! Optimizer exits with a failure")
         print("Detailed Description: {}".format(_res.message))
+        return None, None
+
+
+def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
+                                t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
+                                t_max_iter: int = 50000) -> (np.ndarray, float):
+    """
+    This function has the same interface as minimize_utility_con6, but its core is
+    using cvxpy.
+
+    :param t_mu:
+    :param t_sigma:
+    :param t_lbd:
+    :param t_bound:
+    :param t_sec:
+    :param t_sec_bound:
+    :param t_max_iter:
+    :return:
+    """
+
+    _p, _ = t_sigma.shape
+    _a = np.vstack([np.ones(_p), t_sec])
+    _lb = np.concatenate(([1], t_sec_bound))
+    _rb = np.concatenate(([1], t_sec_bound))
+
+    _w = cvp.Variable(_p)
+    _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
+    _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _lb <= _a @ _w, _a @ _w <= _rb]
+    _problem = cvp.Problem(_objective, _constraints)
+    _problem.solve()
+    print(_problem.status)
+    if _problem.status == "optimal":
+        _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
+        return _w.value, _u[0,0]
+    else:
+        print("ERROR! Optimizer exits with a failure")
+        print("Detailed Description: {}".format(_problem.status))
         return None, None
 
 
