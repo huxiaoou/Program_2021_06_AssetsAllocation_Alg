@@ -144,6 +144,7 @@ def minimize_utility_con(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float, t_
 
 def minimize_utility_con2(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float) -> (np.ndarray, float):
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_utility,
         x0=np.ones(_p) / _p,
@@ -163,6 +164,7 @@ def minimize_utility_con2(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float) -
 def minimize_utility_con3(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                           t_bound: float, t_max_iter: int = 50000) -> (np.ndarray, float):
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_utility,
         x0=np.ones(_p) / _p,
@@ -185,6 +187,7 @@ def minimize_utility_con4(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
     _a = np.vstack([np.ones(_p), t_sec])
     _lb = np.concatenate(([0], t_sec_l_bound))
     _rb = np.concatenate(([1], t_sec_r_bound))
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_utility,
         x0=np.ones(_p) / _p,
@@ -203,6 +206,7 @@ def minimize_utility_con4(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
 def minimize_utility_con5(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                           t_bound, t_sec: np.ndarray, t_sec_l_bound: np.ndarray, t_sec_r_bound: np.ndarray, t_max_iter: int = 50000) -> (np.ndarray, float):
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_utility,
         x0=np.ones(_p) / _p,
@@ -329,6 +333,7 @@ def minimize_risk_budget_con2(t_sigma: np.ndarray, t_rb: np.ndarray, t_verbose) 
     :return:
     """
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_risk_budget,
         x0=np.ones(_p) / _p,
@@ -355,6 +360,7 @@ def maximum_return_with_confined_variance(t_mu: np.ndarray, t_sigma: np.ndarray,
     :return:
     """
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_return_mirror,
         x0=np.ones(_p) / _p,
@@ -387,6 +393,7 @@ def minimum_variance_with_confined_return(t_mu: np.ndarray, t_sigma: np.ndarray,
     :return:
     """
     _p, _ = t_sigma.shape
+    # noinspection PyTypeChecker
     _res = minimize(
         fun=portfolio_variance,
         x0=np.ones(_p) / _p,
