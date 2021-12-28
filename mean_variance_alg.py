@@ -222,10 +222,45 @@ def minimize_utility_con5(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
         return None, None
 
 
+def minimize_utility_con6(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
+                          t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
+                          t_max_iter: int = 50000) -> (np.ndarray, float):
+    """
+    Created @ 2021-12-22 For E:\\Works\\2021\\Project_2021_12_Commodity_Allocation_With_Risk_Model_V0
+    :param t_mu:
+    :param t_sigma:
+    :param t_lbd:
+    :param t_bound:
+    :param t_sec:
+    :param t_sec_bound:
+    :param t_max_iter:
+    :return:
+    """
+    _p, _ = t_sigma.shape
+    _a = np.vstack([np.ones(_p), t_sec])
+    _lb = np.concatenate(([1], t_sec_bound))
+    _rb = np.concatenate(([1], t_sec_bound))
+    # noinspection PyTypeChecker
+    _res = minimize(
+        fun=portfolio_utility,
+        x0=np.ones(_p) / _p,
+        args=(t_mu, t_sigma, t_lbd),
+        bounds=[t_bound] * _p,
+        constraints=scipy.optimize.LinearConstraint(_a, _lb, _rb),  # control exposure at each sector
+        options={"maxiter": t_max_iter}
+    )
+    if _res.success:
+        return _res.x, _res.fun
+    else:
+        print("ERROR! Optimizer exits with a failure")
+        print("Detailed Description: {}".format(_res.message))
+        return None, None
+
+
 def minimize_utility_con_analytic(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float, t_H: np.ndarray, t_h: np.ndarray, t_F: np.ndarray, t_f: np.ndarray) -> (np.ndarray, float):
     """
 
-    :param t_mu: the mean of assets return, shape: P x 1
+    :param t_mu: the mean of assets returns, shape: P x 1
     :param t_sigma: the covariance of available assets, shape: P x P
     :param t_lbd: risk aversion coefficient, shape: 1 x 1
     :param t_H: equality confine left, shape: M x P, M = number of equality confine
