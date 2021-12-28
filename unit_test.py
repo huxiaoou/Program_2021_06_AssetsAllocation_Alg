@@ -1,4 +1,3 @@
-import numpy as np
 from mean_variance_alg import *
 
 np.set_printoptions(4, suppress=True)
