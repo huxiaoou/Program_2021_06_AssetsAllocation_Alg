@@ -288,15 +288,21 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
     _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _lb <= _a @ _w, _a @ _w <= _rb]
     _problem = cvp.Problem(_objective, _constraints)
-    _problem.solve()
-    print(_problem.status)
-    if _problem.status == "optimal":
-        _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
-        return _w.value, _u
-    else:
-        print("ERROR! Optimizer exits with a failure")
-        print("Detailed Description: {}".format(_problem.status))
-        return None, None
+    _success_tag = 0
+    while _success_tag < 10:
+        try:
+            _problem.solve()
+            if _problem.status == "optimal":
+                _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
+                return _w.value, _u
+            else:
+                _success_tag += 1
+        except cvp.error.DCPError:
+            print("Function tried for {} time".format(_success_tag))
+            print("ERROR! Optimizer exits with a failure")
+            print("Problem does not follow DCP rules")
+            _success_tag += 1
+    return None, None
 
 
 def minimize_utility_con_analytic(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float, t_H: np.ndarray, t_h: np.ndarray, t_F: np.ndarray, t_f: np.ndarray) -> (np.ndarray, float):
