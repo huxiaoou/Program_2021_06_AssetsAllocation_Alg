@@ -4,7 +4,7 @@ np.set_printoptions(4, suppress=True)
 
 mu = np.array([0.8, 0.2, 0.5, -0.2])
 r = 0.2
-sigma = np.matrix([
+sigma = np.array([
     [1.0, r, r, r],
     [r, 1.0, r, r],
     [r, r, 1.0, r],
@@ -38,6 +38,6 @@ diff = np.sum([
 ]
 )
 
-print("u0   = {:9.6f}".format(u0[0, 0]))
-print("u1   = {:9.6f}".format(u1[0, 0]))
+print("u0   = {:9.6f}".format(u0))
+print("u1   = {:9.6f}".format(u1))
 print("diff = {:9.6f}".format(diff))

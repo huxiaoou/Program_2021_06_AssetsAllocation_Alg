@@ -292,7 +292,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     print(_problem.status)
     if _problem.status == "optimal":
         _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
-        return _w.value, _u[0,0]
+        return _w.value, _u
     else:
         print("ERROR! Optimizer exits with a failure")
         print("Detailed Description: {}".format(_problem.status))
