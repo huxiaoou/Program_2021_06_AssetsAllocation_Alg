@@ -264,7 +264,7 @@ def minimize_utility_con6(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
 
 def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                                 t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
-                                t_max_iter: int = 50000) -> (np.ndarray, float):
+                                t_max_iter_times: int = 20) -> (np.ndarray, float):
     """
     This function has the same interface as minimize_utility_con6, but its core is
     using cvxpy.
@@ -275,7 +275,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     :param t_bound:
     :param t_sec:
     :param t_sec_bound:
-    :param t_max_iter:
+    :param t_max_iter_times:
     :return:
     """
 
@@ -284,24 +284,26 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     _lb = np.concatenate(([1], t_sec_bound))
     _rb = np.concatenate(([1], t_sec_bound))
 
-    _w = cvp.Variable(_p)
-    _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
-    _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _lb <= _a @ _w, _a @ _w <= _rb]
-    _problem = cvp.Problem(_objective, _constraints)
-    _success_tag = 0
-    while _success_tag < 10:
+    _iter_times = 0
+    while _iter_times < t_max_iter_times:
         try:
+            _w = cvp.Variable(_p)
+            _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
+            # _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _lb <= _a @ _w, _a @ _w <= _rb]
+            _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _a @ _w == _rb]
+            _problem = cvp.Problem(_objective, _constraints)
             _problem.solve()
             if _problem.status == "optimal":
                 _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
                 return _w.value, _u
             else:
-                _success_tag += 1
+                _iter_times += 1
         except cvp.error.DCPError:
-            print("Function tried for {} time".format(_success_tag))
-            print("ERROR! Optimizer exits with a failure")
-            print("Problem does not follow DCP rules")
-            _success_tag += 1
+            # print("Function tried for {} time".format(_iter_times))
+            # print("ERROR! Optimizer exits with a failure")
+            # print("Problem does not follow DCP rules")
+            _iter_times += 1
+    print("Maximum iter times reached before an optimal solution is found.")
     return None, None
 
 
