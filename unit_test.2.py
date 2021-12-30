@@ -1,5 +1,4 @@
-import numpy as np
-
+import sys
 from mean_variance_alg import *
 
 np.set_printoptions(4, suppress=True)
@@ -24,7 +23,7 @@ if part_switch["Part1"]:
     sec_bound = sec.dot(w0)
 
     print("\nminimize_utility_con6")
-    w, utility_min = minimize_utility_con6_cvxpy(
+    w, utility_opt = minimize_utility_con6_cvxpy(
         t_mu=mu,
         t_sigma=sigma,
         t_lbd=lbd,
@@ -34,7 +33,7 @@ if part_switch["Part1"]:
     )
     if w is not None:
         print("w           = {}".format(w))
-        print("utility_min = {:.6f}".format(utility_min))
+        print("utility_min = {:.6f}".format(utility_opt))
     else:
         print("ERROR")
 
@@ -54,20 +53,23 @@ if part_switch["Part1"]:
 if part_switch["Part2"]:
     n = 1000
     x0 = np.random.normal(loc=0.1, scale=1, size=n)
-    e = np.random.normal(loc=-0.05, scale=0.5, size=n)
-    x1 = x0 + e
-    x2 = -x0 - x1
-    r = np.array([x0, x1, x2]).transpose()
+    x1 = -x0
+    e2 = np.random.normal(loc=-0.1, scale=0.5, size=n)
+    e3 = np.random.normal(loc=0.2, scale=0.5, size=n)
+    x2 = x0 + e2
+    x3 = x0 + e3
+    x4 = -x0 - x1 - x2 - x3
+    r = np.array([x0, x1, x2, x3, x4]).transpose()
     mu = r.mean(axis=0)
     sigma = np.cov(r, rowvar=False)
-    lbd = 10
+    lbd = float(sys.argv[1])
     _, p = r.shape
     w0 = np.ones(p) / p
-    sec = np.array([[1, 1, 0], [0, 0, 1]])
+    sec = np.array([[1, 1, 0, 0, 0], [0, 0, 1, 1, 1]])
     sec_bound = sec.dot(w0)
 
     print("\nminimize_utility_con6")
-    w, utility_min = minimize_utility_con6_cvxpy(
+    w, utility_opt = minimize_utility_con6_cvxpy(
         t_mu=mu,
         t_sigma=sigma,
         t_lbd=lbd,
@@ -75,8 +77,10 @@ if part_switch["Part2"]:
         t_sec=sec,
         t_sec_bound=sec_bound,
     )
+    utility_raw = portfolio_utility(t_w=w0, t_mu=mu, t_sigma=sigma, t_lbd=lbd)
     if w is not None:
         print("w           = {}".format(w))
-        print("utility_min = {:.6f}".format(utility_min))
+        print("raw utility = {:.6f}".format(utility_raw))
+        print("opt utility = {:.6f}".format(utility_opt))
     else:
         print("ERROR")

@@ -2,6 +2,7 @@ import numpy as np
 import cvxpy as cvp
 import scipy.optimize
 from scipy.optimize import minimize
+from scipy.sparse.linalg.eigen.arpack.arpack import ArpackNoConvergence
 
 """
 created @ 2021-06-16
@@ -303,7 +304,13 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
             # print("ERROR! Optimizer exits with a failure")
             # print("Problem does not follow DCP rules")
             _iter_times += 1
-    print("Maximum iter times reached before an optimal solution is found.")
+        except ArpackNoConvergence:
+            # print("Function tried for {} time".format(_iter_times))
+            # print("ERROR! Optimizer exits with a failure")
+            # print("Arpack No Convergence Error")
+            _iter_times += 1
+
+    # print("Maximum iter times reached before an optimal solution is found.")
     return None, None
 
 
