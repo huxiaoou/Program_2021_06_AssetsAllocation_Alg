@@ -314,6 +314,59 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     return None, None
 
 
+def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
+                                t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
+                                t_l_bound_offset: float = 0, t_r_bound_offset: float = 0,
+                                t_max_iter_times: int = 20) -> (np.ndarray, float):
+    """
+    This function has the same interface as minimize_utility_con6, but its core is
+    using cvxpy.
+
+    :param t_mu:
+    :param t_sigma:
+    :param t_lbd:
+    :param t_bound:
+    :param t_sec:
+    :param t_sec_bound:
+    :param t_l_bound_offset:
+    :param t_r_bound_offset:
+    :param t_max_iter_times:
+    :return:
+    """
+
+    _p, _ = t_sigma.shape
+    _a = np.vstack([np.ones(_p), t_sec])
+    _lb = np.concatenate(([1], t_sec_bound + t_l_bound_offset))
+    _rb = np.concatenate(([1], t_sec_bound + t_r_bound_offset))
+
+    _iter_times = 0
+    while _iter_times < t_max_iter_times:
+        try:
+            _w = cvp.Variable(_p)
+            _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
+            _constraints = [t_bound[0] <= _w, _w <= t_bound[1], cvp.sum(cvp.abs(_w)) <= 1, _lb <= _a @ _w, _a @ _w <= _rb]
+            _problem = cvp.Problem(_objective, _constraints)
+            _problem.solve()
+            if _problem.status == "optimal":
+                _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
+                return _w.value, _u
+            else:
+                _iter_times += 1
+        except cvp.error.DCPError:
+            # print("Function tried for {} time".format(_iter_times))
+            # print("ERROR! Optimizer exits with a failure")
+            # print("Problem does not follow DCP rules")
+            _iter_times += 1
+        except ArpackNoConvergence:
+            # print("Function tried for {} time".format(_iter_times))
+            # print("ERROR! Optimizer exits with a failure")
+            # print("Arpack No Convergence Error")
+            _iter_times += 1
+
+    # print("Maximum iter times reached before an optimal solution is found.")
+    return None, None
+
+
 def minimize_utility_con_analytic(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float, t_H: np.ndarray, t_h: np.ndarray, t_F: np.ndarray, t_f: np.ndarray) -> (np.ndarray, float):
     """
 
