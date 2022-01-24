@@ -316,7 +316,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
 
 def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                                 t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
-                                t_l_bound_offset: float = 0, t_r_bound_offset: float = 0,
+                                t_l_bound_offset: float, t_r_bound_offset: float,
                                 t_max_iter_times: int = 20) -> (np.ndarray, float):
     """
     This function has the same interface as minimize_utility_con6, but its core is
@@ -335,9 +335,9 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     """
 
     _p, _ = t_sigma.shape
-    _a = np.vstack([np.ones(_p), t_sec])
-    _lb = np.concatenate(([1], t_sec_bound + t_l_bound_offset))
-    _rb = np.concatenate(([1], t_sec_bound + t_r_bound_offset))
+    _a = t_sec
+    _lb = t_sec_bound + t_l_bound_offset
+    _rb = t_sec_bound + t_r_bound_offset
 
     _iter_times = 0
     while _iter_times < t_max_iter_times:
