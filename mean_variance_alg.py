@@ -265,6 +265,7 @@ def minimize_utility_con6(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
 
 def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                                 t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
+                                t_solver: str = "ECOS",
                                 t_max_iter_times: int = 20) -> (np.ndarray, float):
     """
     This function has the same interface as minimize_utility_con6, but its core is
@@ -276,6 +277,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     :param t_bound:
     :param t_sec:
     :param t_sec_bound:
+    :param t_solver: frequently used solvers = ["ECOS", "OSQP", "SCS"], "SCS" solve all the problem
     :param t_max_iter_times:
     :return:
     """
@@ -293,7 +295,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
             # _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _lb <= _a @ _w, _a @ _w <= _rb]
             _constraints = [t_bound[0] <= _w, _w <= t_bound[1], _a @ _w == _rb]
             _problem = cvp.Problem(_objective, _constraints)
-            _problem.solve()
+            _problem.solve(solver=t_solver)
             if _problem.status == "optimal":
                 _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
                 return _w.value, _u
@@ -317,6 +319,7 @@ def minimize_utility_con6_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
 def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: float,
                                 t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
                                 t_l_bound_offset: float, t_r_bound_offset: float,
+                                t_solver: str = "ECOS",
                                 t_max_iter_times: int = 20) -> (np.ndarray, float):
     """
     This function has the same interface as minimize_utility_con6, but its core is
@@ -330,6 +333,7 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     :param t_sec_bound:
     :param t_l_bound_offset:
     :param t_r_bound_offset:
+    :param t_solver: frequently used solvers = ["ECOS", "OSQP", "SCS"], "SCS" solve all the problem
     :param t_max_iter_times:
     :return:
     """
@@ -346,7 +350,7 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
             _objective = cvp.Minimize(-2 / t_lbd * _w @ t_mu + cvp.quad_form(_w, t_sigma))
             _constraints = [t_bound[0] <= _w, _w <= t_bound[1], cvp.sum(cvp.abs(_w)) <= 1, _lb <= _a @ _w, _a @ _w <= _rb]
             _problem = cvp.Problem(_objective, _constraints)
-            _problem.solve()
+            _problem.solve(solver=t_solver)
             if _problem.status == "optimal":
                 _u = portfolio_utility(t_w=_w.value, t_mu=t_mu, t_sigma=t_sigma, t_lbd=t_lbd)
                 return _w.value, _u
