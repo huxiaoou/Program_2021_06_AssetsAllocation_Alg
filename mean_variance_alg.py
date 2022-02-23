@@ -320,7 +320,7 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
                                 t_bound: tuple, t_sec: np.ndarray, t_sec_bound: np.ndarray,
                                 t_l_bound_offset: float, t_r_bound_offset: float,
                                 t_solver: str = "ECOS",
-                                t_max_iter_times: int = 20) -> (np.ndarray, float):
+                                t_max_iter_times: int = 20, t_verbose: bool = False) -> (np.ndarray, float):
     """
     This function has the same interface as minimize_utility_con6, but its core is
     using cvxpy.
@@ -335,6 +335,7 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
     :param t_r_bound_offset:
     :param t_solver: frequently used solvers = ["ECOS", "OSQP", "SCS"], "SCS" solve all the problem
     :param t_max_iter_times:
+    :param t_verbose: whether to print error information
     :return:
     """
 
@@ -357,14 +358,16 @@ def minimize_utility_con7_cvxpy(t_mu: np.ndarray, t_sigma: np.ndarray, t_lbd: fl
             else:
                 _iter_times += 1
         except cvp.error.DCPError:
-            # print("Function tried for {} time".format(_iter_times))
-            # print("ERROR! Optimizer exits with a failure")
-            # print("Problem does not follow DCP rules")
+            if t_verbose:
+                print("Function tried for {} time".format(_iter_times))
+                print("ERROR! Optimizer exits with a failure")
+                print("Problem does not follow DCP rules")
             _iter_times += 1
         except ArpackNoConvergence:
-            # print("Function tried for {} time".format(_iter_times))
-            # print("ERROR! Optimizer exits with a failure")
-            # print("Arpack No Convergence Error")
+            if t_verbose:
+                print("Function tried for {} time".format(_iter_times))
+                print("ERROR! Optimizer exits with a failure")
+                print("Arpack No Convergence Error")
             _iter_times += 1
 
     # print("Maximum iter times reached before an optimal solution is found.")
